@@ -1,18 +1,9 @@
 <template>
   <form @submit.prevent="submitForm" class="workout-form">
-    <div>
-      <label for="name">Workout Name</label>
-      <input
-        type="text"
-        id="name"
-        v-model="form.name"
-        placeholder="Ex: Morning Run"
-        required
-      />
-    </div>
 
     <div>
-      <label for="type">Workout Type</label>
+      <label for="type">Träning</label>
+      <br>
       <select id="type" v-model="form.type" required>
         <option disabled value="">Välj typ</option>
         <option>Cardio</option>
@@ -23,22 +14,76 @@
     </div>
 
     <div>
-      <label for="duration">Duration (minutes)</label>
+      <label for="description">Beskrivning</label>
+      <br>
       <input
-        type="number"
-        id="duration"
-        v-model.number="form.duration"
-        min="1"
+        type="text"
+        id="description"
+        v-model="form.description"
         required
       />
     </div>
 
     <div>
-      <label for="date">Date</label>
-      <input type="date" id="date" v-model="form.date" required />
+      <label for="date">Datum</label>
+      <br>
+      <input type="date"
+        id="date"
+        v-model="form.date"
+        required />
     </div>
 
-    <button type="submit">Skicka workout</button>
+    <div>
+      <label for="time">Tid</label>
+      <br>
+      <input
+        type ="time"
+        id="time"
+        v-model="form.time"
+        />
+
+        <select id="time_unit" v-model = "form.time_unit">
+          <option value="">Välj enhet</option>
+          <option>Minuter</option>
+          <option>Timmar</option>
+        </select>
+    </div>
+
+    <div>
+      <label for="length">Längd</label>
+      <br>
+      <input
+        type ="number"
+        id="length"
+        v-model="form.length"
+        />
+
+        <select id="length_unit" v-model = "form.length_unit">
+          <option value="">Välj enhet</option>
+          <option>Kilometer</option>
+          <option>Meter</option>
+        </select>
+    </div>
+
+    <div>
+      <label for="difficulty">Svårighetsgrad</label>
+      <br>
+      <select id="difficulty" v-model="form.difficulty" required>
+        <option disabled value="">Välj hur jobbigt det var</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+        <option>6</option>
+        <option>7</option>
+        <option>8</option>
+        <option>9</option>
+        <option>10</option>
+      </select>
+    </div>
+
+    <button type="submit">Spara träning</button>
 
     <!-- Feedback -->
     <p v-if="success" class="success-msg">Workout skickad!</p>
@@ -51,10 +96,15 @@ import { reactive, ref } from "vue"
 
 // Form-data
 const form = reactive({
-  name: "",
   type: "",
-  duration: null,
-  date: ""
+  duration: "",
+  date: "",
+  time: "",
+  time_unit: "",
+  length: "",
+  length_unit: "",
+  difficulty: "",
+
 })
 
 // Feedback
@@ -67,7 +117,7 @@ const submitForm = async () => {
   error.value = false
 
   try {
-    const response = await fetch("http://localhost:3000/workout", {
+    const response = await fetch("http://localhost:5173/workouts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -82,10 +132,14 @@ const submitForm = async () => {
 
     success.value = true
     // Reset form
-    form.name = ""
-    form.type = ""
-    form.duration = null
-    form.date = ""
+      form.type = ""
+      form.duration = ""
+      form.date = ""
+      form.time = ""
+      form.time_unit = ""
+      form.length = ""
+      form.length_unit = ""
+      form.difficulty = ""
   } catch (err) {
     console.error(err)
     error.value = true

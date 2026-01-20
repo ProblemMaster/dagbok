@@ -2,11 +2,13 @@
 import { createRouter, createWebHistory } from "vue-router"
 import ActivitiesView from "@/views/ActivitiesView.vue"
 import WorkoutView from "@/views/WorkoutView.vue"
+import NotFoundView from "@/views/NotFoundView.vue"
 
 const routes = [
   { path: "/", redirect: "/activities" },
   { path: "/activities", component: ActivitiesView },
-  { path: "/workout", component: WorkoutView }
+  { path: "/workouts", component: WorkoutView },
+  { path: "/:pathMatch(.*)*", component: NotFoundView }
 ]
 
 export default createRouter({

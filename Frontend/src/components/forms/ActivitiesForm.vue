@@ -1,7 +1,8 @@
 <template>
   <form @submit.prevent="submitForm" class="activities-form">
     <div>
-      <label for="activity-name">Activity Name</label>
+      <label for="activity-name">Ny aktivitet:</label>
+      <br>
       <input
         type="text"
         id="activity-name"
@@ -12,33 +13,19 @@
     </div>
 
     <div>
-      <label for="category">Category</label>
-      <select id="category" v-model="form.category" required>
-        <option disabled value="">Välj kategori</option>
-        <option>Cardio</option>
-        <option>Strength</option>
-        <option>Flexibility</option>
-        <option>Balance</option>
-      </select>
-    </div>
-
-    <div>
-      <label for="duration">Duration (minutes)</label>
+      <label for="description">Beskrivning:</label>
+      <br>
       <input
-        type="number"
-        id="duration"
-        v-model.number="form.duration"
-        min="1"
+        type="text"
+        id="description"
+        v-model="form.description"
+        placeholder="Ex: Hur man utför aktiviteten"
+        size = "40"
         required
       />
     </div>
 
-    <div>
-      <label for="date">Date</label>
-      <input type="date" id="date" v-model="form.date" required />
-    </div>
-
-    <button type="submit">Skicka activity</button>
+    <button type="submit">Spara aktivitet</button>
 
     <!-- Feedback -->
     <p v-if="success" class="success-msg">Activity skickad!</p>
@@ -52,9 +39,7 @@ import { reactive, ref } from "vue"
 // Form-data
 const form = reactive({
   name: "",
-  category: "",
-  duration: null,
-  date: ""
+  description: "",
 })
 
 // Feedback
@@ -67,7 +52,7 @@ const submitForm = async () => {
   error.value = false
 
   try {
-    const response = await fetch("http://localhost:3000/activities", {
+    const response = await fetch("http://localhost:5173/activities", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

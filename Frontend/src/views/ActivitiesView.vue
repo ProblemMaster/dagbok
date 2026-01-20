@@ -1,5 +1,5 @@
 <template>
-  <h1>Activities</h1>
+  <h1>Aktiviteter</h1>
   <ActivitiesForm />
 </template>
 

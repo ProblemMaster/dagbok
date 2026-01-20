@@ -1,5 +1,5 @@
 <template>
-  <h1>Workout</h1>
+  <h1>Träningsdagbok</h1>
   <WorkoutForm />
 </template>
 
