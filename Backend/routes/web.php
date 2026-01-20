@@ -21,3 +21,8 @@ $router->get('/activities', 'ActivityController@index');
 $router->post('/activities', 'ActivityController@store');
 $router->put('/activities/{id}', 'ActivityController@update');
 $router->delete('/activities/{id}', 'ActivityController@destroy');
+
+$router->get('/workouts', 'WorkoutController@index');
+$router->post('/workouts', 'WorkoutController@store');
+$router->put('/workouts/{id}', 'WorkoutController@update');
+$router->delete('/workouts/{id}', 'WorkoutController@destroy');
