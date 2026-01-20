@@ -17,6 +17,3 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-// REgistrera användare
-$router->get('/register', 'UserController@showRegister');
-$router->post('/register', 'userController@register');
