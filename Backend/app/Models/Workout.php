@@ -8,6 +8,7 @@ class Workout extends Model {
     protected $fillable = [
         'activity_id',
         'date',
+        'description',
         'effort_level',
         'distance_value',
         'distance_unit',

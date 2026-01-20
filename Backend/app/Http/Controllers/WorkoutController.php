@@ -33,6 +33,7 @@ class WorkoutController extends Controller {
         $validator = Validator::make($request->all(), [
             'activity_id'    => 'required|exists:activities,id',
             'date'           => 'required|date',
+            'description' => 'nullable|string|max:1000',
             'effort_level'   => 'required|integer|min:0|max:10',
             'distance_value' => 'nullable|numeric|min:0',
             'distance_unit'  => 'nullable|string|max:10',
@@ -56,6 +57,7 @@ class WorkoutController extends Controller {
         $validator = Validator::make($request->all(), [
             'activity_id'    => 'required|exists:activities,id',
             'date'           => 'required|date',
+            'description' => 'nullable|string|max:1000',
             'effort_level'   => 'required|integer|min:0|max:10',
             'distance_value' => 'nullable|numeric|min:0',
             'distance_unit'  => 'nullable|string|max:10',
