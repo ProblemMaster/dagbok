@@ -17,3 +17,7 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
+$router->get('/activities', 'ActivityController@index');
+$router->post('/activities', 'ActivityController@store');
+$router->put('/activities/{id}', 'ActivityController@update');
+$router->delete('/activities/{id}', 'ActivityController@destroy');

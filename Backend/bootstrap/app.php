@@ -75,10 +75,10 @@ $app->configure('database');
 // $app->middleware([
 //     App\Http\Middleware\ExampleMiddleware::class
 // ]);
-
+/*
 $app->routeMiddleware([
      'auth.jwt' => App\Http\Middleware\AuthJwtMiddleware::class,
- ]);
+ ]);*/
 
 /*
 |--------------------------------------------------------------------------
