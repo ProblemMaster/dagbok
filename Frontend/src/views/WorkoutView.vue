@@ -1,5 +1,5 @@
 <template>
-  <h1>Träningsdagbok</h1>
+  <h1>Lägg till nytt träningspass</h1>
   <WorkoutForm />
 </template>
 

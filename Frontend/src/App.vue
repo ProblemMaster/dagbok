@@ -3,7 +3,11 @@ import {  RouterView } from 'vue-router'
 </script>
 
 <template>
+<header>
+  Träningsdagbok
+</header>
 
-
-  <RouterView />
+  <main>
+    <RouterView />
+  </main>
 </template>

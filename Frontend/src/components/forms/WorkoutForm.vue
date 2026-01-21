@@ -11,6 +11,8 @@
         <option>Flexibility</option>
         <option>Balance</option>
       </select>
+
+      <RouterLink to="/activities">Lägg till ny aktivitet</RouterLink>
     </div>
 
     <div>

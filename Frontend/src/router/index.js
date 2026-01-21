@@ -5,7 +5,7 @@ import WorkoutView from "@/views/WorkoutView.vue"
 import NotFoundView from "@/views/NotFoundView.vue"
 
 const routes = [
-  { path: "/", redirect: "/activities" },
+  { path: "/", redirect: "/workouts" },
   { path: "/activities", component: ActivitiesView },
   { path: "/workouts", component: WorkoutView },
   { path: "/:pathMatch(.*)*", component: NotFoundView }

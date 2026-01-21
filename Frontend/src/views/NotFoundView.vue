@@ -1,5 +1,5 @@
 <template>
-  <div class="not-found">
+  <div class="not-found" >
     <h1>404</h1>
     <p>Sidan du söker finns inte.</p>
 

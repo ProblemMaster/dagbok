@@ -1,0 +1,13 @@
+header {
+  padding: 40px 0px;
+  text-align: center;
+  color: white;
+  font-size: 30px;
+  box-sizing: border-box;
+  background-image: linear-gradient(to bottom, blue, pink);
+}
+body {
+  margin: 0;
+  padding: 0;
+}
+
