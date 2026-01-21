@@ -36,16 +36,31 @@ class WorkoutController extends Controller {
             'description' => 'nullable|string|max:1000',
             'effort_level'   => 'required|integer|min:0|max:10',
             'distance_value' => 'nullable|numeric|min:0',
-            'distance_unit'  => 'nullable|string|max:10',
+            'distance_unit'  => 'nullable|in:m,km',
             'duration_value' => 'nullable|numeric|min:0',
-            'duration_unit'  => 'nullable|string|max:10',
+            'duration_unit'  => 'nullable|in:min,h',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $workout = Workout::create($validator->validated());
+        $data = $validator->validated();
+
+        $data['distance_value'] = $this->convertDistanceToKm(
+            $data['distance_value'] ?? null,
+            $data['distance_unit'] ?? null
+        );
+
+        $data['duration_value'] = $this->convertDurationToMinutes(
+            $data['duration_value'] ?? null,
+            $data['duration_unit'] ?? null
+        );
+
+        $data['distance_unit'] = 'km';
+        $data['duration_unit'] = 'min';
+
+        $workout = Workout::create($data);
 
         return response()->json($workout, 201);
     }
@@ -60,16 +75,31 @@ class WorkoutController extends Controller {
             'description' => 'nullable|string|max:1000',
             'effort_level'   => 'required|integer|min:0|max:10',
             'distance_value' => 'nullable|numeric|min:0',
-            'distance_unit'  => 'nullable|string|max:10',
+            'distance_unit'  => 'nullable|in:m,km',
             'duration_value' => 'nullable|numeric|min:0',
-            'duration_unit'  => 'nullable|string|max:10',
+            'duration_unit'  => 'nullable|in:min,h',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $workout->update($validator->validated());
+        $data = $validator->validated();
+
+        $data['distance_value'] = $this->convertDistanceToKm(
+            $data['distance_value'] ?? null,
+            $data['distance_unit'] ?? null
+        );
+
+        $data['duration_value'] = $this->convertDurationToMinutes(
+            $data['duration_value'] ?? null,
+            $data['duration_unit'] ?? null
+        );
+
+        $data['distance_unit'] = 'km';
+        $data['duration_unit'] = 'min';
+
+        $workout->update($data);
 
         return response()->json($workout);
     }
@@ -80,5 +110,25 @@ class WorkoutController extends Controller {
         $workout->delete();
 
         return response()->json(['message' => 'Workout deleted']);
+    }
+
+    private function convertDistanceToKm($value, $unit) {
+        if($value === null) {
+            return null;
+        }
+
+        return $unit === 'm'
+            ? $value / 1000
+            : $value; // km
+    }
+
+    private function convertDurationToMinutes($value, $unit) {
+        if($value === null) {
+            return null;
+        }
+
+        return $unit === 'h'
+            ? $value * 60
+            : $value; // min
     }
 }
