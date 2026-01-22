@@ -21,7 +21,6 @@ class ActivityController extends Controller
         // Validering
         $validator = Validator::make($request->all(), [
         'name' => 'required|string|unique:activities,name',
-        'description' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -40,7 +39,6 @@ class ActivityController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|unique:activities,name,'.$id,
-            'description' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {

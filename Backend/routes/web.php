@@ -35,8 +35,8 @@ $router->get('/statistics/all', 'StatisticsController@all');
 
 
 // Timeline rutter
-$router->get('/statistics/timeline', 'TimelineController@index');
 $router->get('/statistics/timeline/all', 'TimelineController@allActivities');
+$router->get('/statistics/timeline/{activity_id}', 'TimelineController@index');
 
 // pdf
 $router->get('/workouts/pdf', 'WorkoutPdfController@export');
