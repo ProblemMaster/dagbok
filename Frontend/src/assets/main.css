@@ -4,7 +4,7 @@ header {
   color: white;
   font-size: 30px;
   box-sizing: border-box;
-  background-image: linear-gradient(to bottom, blue, pink);
+  background-image: linear-gradient(to bottom, red, #ffe0f1);
 }
 body {
   margin: 0;

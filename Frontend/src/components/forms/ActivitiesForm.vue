@@ -25,7 +25,8 @@
       />
     </div>
 
-    <button type="submit">Spara aktivitet</button>
+    <button type="submit" >Spara aktivitet</button>
+    <button type="button" @click="avbryt">Avbryt</button>
 
     <!-- Feedback -->
     <p v-if="success" class="success-msg">Activity skickad!</p>
@@ -35,6 +36,9 @@
 
 <script setup>
 import { reactive, ref } from "vue"
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // Form-data
 const form = reactive({
@@ -52,6 +56,7 @@ const submitForm = async () => {
   error.value = false
 
   try {
+    //TODO: API anrop
     const response = await fetch("http://localhost:5173/activities", {
       method: "POST",
       headers: {
@@ -64,6 +69,8 @@ const submitForm = async () => {
 
     const data = await response.json()
     console.log("Svar från backend:", data)
+    // Byt view efter att ha sparat
+    this.$router.push('/aktivitet');
 
     success.value = true
     // Reset form
@@ -76,6 +83,10 @@ const submitForm = async () => {
     error.value = true
   }
 }
+const avbryt = () => {
+  router.push('/workouts'); // eller t.ex. '/aktiviteter', '/hem' etc.
+};
+
 </script>
 
 <style scoped>
