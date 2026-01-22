@@ -39,9 +39,10 @@
       <label for="time">Tid</label>
       <br>
       <input
-        type ="time"
+        type ="number"
         id="time"
-        v-model="form.time"
+        v-model.number="form.time"
+        @keypress="onlyNumbers"
         />
 
         <select id="time_unit" v-model = "form.time_unit">
@@ -57,7 +58,8 @@
       <input
         type ="number"
         id="length"
-        v-model="form.length"
+        v-model.number="form.length"
+        @keypress="onlyNumbers"
         />
 
         <select id="length_unit" v-model = "form.length_unit">
@@ -96,6 +98,14 @@
 <script setup>
 import { reactive, ref } from "vue"
 
+
+function onlyNumbers(event) {
+  const keyCode = event.keyCode || event.which;
+  if (keyCode < 48 || keyCode > 57) {
+    event.preventDefault();
+  }
+}
+
 // Form-data
 const form = reactive({
   type: "",
@@ -119,6 +129,7 @@ const submitForm = async () => {
   error.value = false
 
   try {
+    //TODO: API anrop
     const response = await fetch("http://localhost:5173/workouts", {
       method: "POST",
       headers: {
@@ -132,7 +143,12 @@ const submitForm = async () => {
     const data = await response.json()
     console.log("Svar från backend:", data)
 
+
+
     success.value = true
+
+    // Byt view efter att ha sparat
+    this.$router.push('/charts');
     // Reset form
       form.type = ""
       form.duration = ""

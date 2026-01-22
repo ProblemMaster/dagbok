@@ -12,19 +12,6 @@
       />
     </div>
 
-    <div>
-      <label for="description">Beskrivning:</label>
-      <br>
-      <input
-        type="text"
-        id="description"
-        v-model="form.description"
-        placeholder="Ex: Hur man utför aktiviteten"
-        size = "40"
-        required
-      />
-    </div>
-
     <button type="submit" >Spara aktivitet</button>
     <button type="button" @click="avbryt">Avbryt</button>
 
@@ -69,15 +56,13 @@ const submitForm = async () => {
 
     const data = await response.json()
     console.log("Svar från backend:", data)
+      success.value = true
+
     // Byt view efter att ha sparat
     this.$router.push('/aktivitet');
 
-    success.value = true
     // Reset form
     form.name = ""
-    form.category = ""
-    form.duration = null
-    form.date = ""
   } catch (err) {
     console.error(err)
     error.value = true
