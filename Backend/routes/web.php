@@ -29,6 +29,14 @@ $router->post('/workouts', 'WorkoutController@store');
 $router->put('/workouts/{id}', 'WorkoutController@update');
 $router->delete('/workouts/{id}', 'WorkoutController@destroy');
 
-//Diagram rutter
+// Diagram rutter
 $router->get('/statistics/activity/{id}', 'StatisticsController@activity');
 $router->get('/statistics/all', 'StatisticsController@all');
+
+
+// Timeline rutter
+$router->get('/statistics/timeline', 'TimelineController@index');
+$router->get('/statistics/timeline/all', 'TimelineController@allActivities');
+
+// pdf
+$router->get('/workouts/pdf', 'WorkoutPdfController@export');

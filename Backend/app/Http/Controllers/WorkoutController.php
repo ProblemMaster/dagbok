@@ -7,6 +7,8 @@ use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Lumen\Routing\Controller;
+use Carbon\Carbom;
+use Illuminate\Support\Carbon;
 
 class WorkoutController extends Controller {
     // Lista alla workouts (med optional filter på aktivitet eller datumintervall)
@@ -32,13 +34,13 @@ class WorkoutController extends Controller {
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
             'activity_id'    => 'required|exists:activities,id',
-            'date'           => 'required|date',
+            'date'           => 'required|date_format:d-m-Y',
             'description' => 'nullable|string|max:1000',
             'effort_level'   => 'required|integer|min:0|max:10',
             'distance_value' => 'nullable|numeric|min:0',
-            'distance_unit'  => 'nullable|in:m,km',
+            'distance_unit'  => 'nullable|string|max:10',
             'duration_value' => 'nullable|numeric|min:0',
-            'duration_unit'  => 'nullable|in:min,h',
+            'duration_unit'  => 'nullable|string|max:10',
         ]);
 
         if ($validator->fails()) {
@@ -47,18 +49,18 @@ class WorkoutController extends Controller {
 
         $data = $validator->validated();
 
-        $data['distance_value'] = $this->convertDistanceToKm(
-            $data['distance_value'] ?? null,
-            $data['distance_unit'] ?? null
-        );
+        // Konvertera d-m-Y -> Y-m-d
+        $data['date'] = Carbon::createFromFormat('d-m-Y', $data['date']) -> format('Y-m-d');
 
-        $data['duration_value'] = $this->convertDurationToMinutes(
-            $data['duration_value'] ?? null,
-            $data['duration_unit'] ?? null
-        );
+        if(isset($data['distance_unit']) && $data ['distance_unit'] === 'm') {
+            $data['distance_value'] = $data['distance_value'] / 1000;
+            $data['distance_unit'] = 'km';
+        }
 
-        $data['distance_unit'] = 'km';
-        $data['duration_unit'] = 'min';
+        if(isset($data['duration_unit']) && $data ['duration_unit'] === 'h') {
+            $data['duration_value'] = $data['duration_value'] * 60;
+            $data['duration_unit'] = 'min';
+        }
 
         $workout = Workout::create($data);
 
@@ -71,13 +73,13 @@ class WorkoutController extends Controller {
 
         $validator = Validator::make($request->all(), [
             'activity_id'    => 'required|exists:activities,id',
-            'date'           => 'required|date',
+            'date'           => 'required|date_format:d-m-Y',
             'description' => 'nullable|string|max:1000',
             'effort_level'   => 'required|integer|min:0|max:10',
             'distance_value' => 'nullable|numeric|min:0',
-            'distance_unit'  => 'nullable|in:m,km',
+            'distance_unit'  => 'nullable|string|max:10',
             'duration_value' => 'nullable|numeric|min:0',
-            'duration_unit'  => 'nullable|in:min,h',
+            'duration_unit'  => 'nullable|string|max:10',
         ]);
 
         if ($validator->fails()) {
@@ -86,18 +88,18 @@ class WorkoutController extends Controller {
 
         $data = $validator->validated();
 
-        $data['distance_value'] = $this->convertDistanceToKm(
-            $data['distance_value'] ?? null,
-            $data['distance_unit'] ?? null
-        );
+        // Konvertera d-m-Y -> Y-m-d
+        $data['date'] = Carbon::createFromFormat('d-m-Y', $data['date'])->format('Y-m-d');
 
-        $data['duration_value'] = $this->convertDurationToMinutes(
-            $data['duration_value'] ?? null,
-            $data['duration_unit'] ?? null
-        );
+        if(isset($data['distance_unit']) && $data ['distance_unit'] === 'm') {
+            $data['distance_value'] = $data['distance_value'] / 1000;
+            $data['distance_unit'] = 'km';
+        }
 
-        $data['distance_unit'] = 'km';
-        $data['duration_unit'] = 'min';
+        if(isset($data['duration_unit']) && $data ['duration_unit'] === 'h') {
+            $data['duration_value'] = $data['duration_value'] * 60;
+            $data['duration_unit'] = 'min';
+        };
 
         $workout->update($data);
 
@@ -110,25 +112,5 @@ class WorkoutController extends Controller {
         $workout->delete();
 
         return response()->json(['message' => 'Workout deleted']);
-    }
-
-    private function convertDistanceToKm($value, $unit) {
-        if($value === null) {
-            return null;
-        }
-
-        return $unit === 'm'
-            ? $value / 1000
-            : $value; // km
-    }
-
-    private function convertDurationToMinutes($value, $unit) {
-        if($value === null) {
-            return null;
-        }
-
-        return $unit === 'h'
-            ? $value * 60
-            : $value; // min
     }
 }
