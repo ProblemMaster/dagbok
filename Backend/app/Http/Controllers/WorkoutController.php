@@ -9,25 +9,29 @@ use Illuminate\Support\Facades\Validator;
 use Laravel\Lumen\Routing\Controller;
 use Carbon\Carbom;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class WorkoutController extends Controller {
     // Lista alla workouts (med optional filter på aktivitet eller datumintervall)
     public function index(Request $request) {
         $query = Workout::with('activity');
 
+
         if ($request->has('activity_id')) {
             $query->where('activity_id', $request->activity_id);
         }
-
         if ($request->has('from')) {
-            $query->where('date', '>=', $request->from);
-        }
+            $from = Carbon::createFromFormat('d-m-Y', $request->from)->format('Y-m-d');
+            $query->where('date', '>=', $from);
+            }
 
-        if ($request->has('to')) {
-            $query->where('date', '<=', $request->to);
-        }
+            if ($request->has('to')) {
+                $to = Carbon::createFromFormat('d-m-Y', $request->to)->format('Y-m-d');
+                $query->where('date', '<=', $to);
+                }
 
         return response()->json($query->get());
+
     }
 
     // Skapa nytt workout-pass
