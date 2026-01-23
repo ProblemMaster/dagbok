@@ -14,12 +14,16 @@ const selectedActivity = ref(null)
 const dateFrom = ref('')
 const dateTo = ref('')
 
-// Lista över aktiviteter (lägg till senare)
-const activities = ref([
-  { id: 1, name: 'Löpning' },
-  { id: 2, name: 'Yoga' },
-  { id: 3, name: 'Cykling' }
-])
+// Hämta aktiviteter för dropdown
+const activities = ref([])
+
+onMounted(async () => {
+  try {
+    activities.value = await api.getActivities()
+  } catch (error) {
+    console.error('Fel:', error)
+  }
+})
 
 // Funktion för att hämta och rendera data
 const fetchAndRenderChart = async () => {
