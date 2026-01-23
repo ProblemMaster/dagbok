@@ -10,3 +10,9 @@ main {
   margin: auto;
   padding: 20px;
 }
+
+#chart {
+  background-color: #ffe9f9;
+  padding: 20px;
+  border-radius: 8px;
+}
