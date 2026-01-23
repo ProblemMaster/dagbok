@@ -19,7 +19,7 @@ return new class extends Migration
                   ->onDelete('cascade');
             $table->date('date');
 
-            $table->unsignedTinyInteger('effort_lever');
+            $table->unsignedTinyInteger('effort_level');
 
             $table->decimal('distance_value', 8, 2)->nullable();
             $table->string('distance_unit',10)->nullable();
