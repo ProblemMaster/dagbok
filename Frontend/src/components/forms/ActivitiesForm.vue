@@ -45,7 +45,7 @@ const submitForm = async () => {
 
   try {
     //TODO: API anrop
-    const response = await fetch("http://localhost:5173/activities", {
+    const response = await fetch("http://localhost:8000", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
