@@ -181,6 +181,16 @@ const resetFilters = () => {
   fetchAndRenderChart()
 }
 
+// Navigera till workouts-sidan
+const goToWorkouts = () => {
+  // Ändra '/workouts' till din faktiska route
+  window.location.href = '/workouts'
+  // Eller om du använder Vue Router:
+  // import { useRouter } from 'vue-router'
+  // const router = useRouter()
+  // router.push('/workouts')
+}
+
 // Hämta data vid första laddning
 onMounted(async () => {
   // Hämta tillgängliga aktiviteter från backend
@@ -205,6 +215,13 @@ watch(filterType, () => {
 
 <template>
   <div class="chart-container">
+    <!-- Navigation -->
+    <div class="navigation">
+      <button @click="goToWorkouts" class="btn-nav">
+        📋 Gå till Workouts
+      </button>
+    </div>
+
     <!-- Filter Section -->
     <div class="filters">
       <h3>Filter</h3>
@@ -283,5 +300,164 @@ watch(filterType, () => {
 </template>
 
 <style scoped>
+.chart-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
+.navigation {
+  margin-bottom: 20px;
+}
+
+.btn-nav {
+  padding: 12px 24px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-nav:hover {
+  background-color: #45a049;
+}
+
+.filters {
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.filters h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.filter-group {
+  margin-bottom: 15px;
+}
+
+.filter-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.radio-group {
+  display: flex;
+  gap: 15px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: normal;
+}
+
+select, input[type="text"] {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+select {
+  width: 100%;
+  max-width: 300px;
+}
+
+.date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.date-inputs input {
+  flex: 1;
+  min-width: 140px;
+}
+
+small {
+  display: block;
+  color: #666;
+  margin-top: 5px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #008FFB;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0077d4;
+}
+
+.btn-secondary {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background-color: #d0d0d0;
+}
+
+.chart-wrapper {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  background-color: #fee;
+  color: #c33;
+  padding: 15px;
+  border-radius: 4px;
+  border-left: 4px solid #c33;
+}
+
+.help-text {
+  margin-top: 15px;
+  color: #666;
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.help-text ol {
+  margin: 10px 0 0 20px;
+}
+
+#chart {
+  min-height: 400px;
+}
 </style>

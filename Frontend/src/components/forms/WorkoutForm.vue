@@ -10,7 +10,7 @@
           {{ activity.name }}
         </option>
       </select>
-
+      <br>
       <RouterLink to="/activities">Lägg till ny aktivitet</RouterLink>
     </div>
 
@@ -96,6 +96,9 @@
 
 <script setup>
 import { reactive, ref, onMounted } from "vue"
+import { useRouter } from "vue-router"
+
+const router = useRouter()
 
 const activities = ref([])
 
@@ -146,7 +149,7 @@ const submitForm = async () => {
 
   try {
     //TODO: API anrop
-    const response = await fetch("http://localhost:5173/workouts", {
+    const response = await fetch("http://localhost:8000/workouts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -164,7 +167,7 @@ const submitForm = async () => {
     success.value = true
 
     // Byt view efter att ha sparat
-    this.$router.push('/charts');
+    router.push('/charts');
     // Reset form
       form.type = ""
       form.duration = ""
