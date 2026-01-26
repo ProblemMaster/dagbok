@@ -104,7 +104,6 @@ const fetchActivities = async () => {
   try {
     const response = await fetch('http://localhost:8000/activities')
     if (!response.ok) throw new Error('Något gick fel vid hämtning av aktiviteter')
-    console.log(response)
     activities.value = await response.json()
   } catch (error) {
     console.error(error)
