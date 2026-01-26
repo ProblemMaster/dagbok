@@ -6,10 +6,9 @@
       <br>
       <select id="type" v-model="form.type" required>
         <option disabled value="">Välj typ</option>
-        <option>Cardio</option>
-        <option>Strength</option>
-        <option>Flexibility</option>
-        <option>Balance</option>
+        <option v-for="activity in activities" :key="activity.id" :value="activity.name">
+          {{ activity.name }}
+        </option>
       </select>
 
       <RouterLink to="/activities">Lägg till ny aktivitet</RouterLink>
@@ -96,8 +95,25 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue"
+import { reactive, ref, onMounted } from "vue"
 
+const activities = ref([])
+
+// Funktion för att hämta aktiviteter från bakcend
+const fetchActivities = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/activities')
+    if (!response.ok) throw new Error('Något gick fel vid hämtning av aktiviteter')
+    console.log(response)
+    activities.value = await response.json()
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+onMounted(() => {
+  fetchActivities()
+})
 
 function onlyNumbers(event) {
   const keyCode = event.keyCode || event.which;
