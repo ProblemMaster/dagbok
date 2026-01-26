@@ -14,16 +14,12 @@ const selectedActivity = ref(null)
 const dateFrom = ref('')
 const dateTo = ref('')
 
-// Hämta aktiviteter för dropdown
-const activities = ref([])
-
-onMounted(async () => {
-  try {
-    activities.value = await api.getActivities()
-  } catch (error) {
-    console.error('Fel:', error)
-  }
-})
+// Lista över aktiviteter (lägg till senare)
+const activities = ref([
+  { id: 1, name: 'Löpning' },
+  { id: 2, name: 'Yoga' },
+  { id: 3, name: 'Cykling' }
+])
 
 // Funktion för att hämta och rendera data
 const fetchAndRenderChart = async () => {
@@ -44,6 +40,41 @@ const fetchAndRenderChart = async () => {
       }
       data = await api.getActivityTimeline(selectedActivity.value, dateFrom.value, dateTo.value)
     }
+
+    // Debug: Visa vad backend returnerar
+    console.log('Backend data (raw):', data)
+
+    // Om backend returnerar en array, ta första elementet
+    if (Array.isArray(data)) {
+      if (data.length === 0) {
+        error.value = 'Ingen data hittades. Lägg till workouts i databasen först!'
+        loading.value = false
+        return
+      }
+      console.log('Data är en array med', data.length, 'element')
+      data = data[0]
+    }
+
+    console.log('Data efter array-check:', data)
+
+    // Kontrollera om data är null eller undefined
+    if (!data) {
+      error.value = 'Ingen data returnerades från backend'
+      loading.value = false
+      return
+    }
+
+    // Kontrollera om data har rätt struktur
+    if (!data.distance || !data.duration) {
+      console.error('Data saknar distance eller duration:', data)
+      error.value = 'Backend returnerade ogiltig data-struktur. Saknar distance eller duration.'
+      loading.value = false
+      return
+    }
+
+    console.log('Distance data:', data.distance)
+    console.log('Duration data:', data.duration)
+    console.log('Labels:', data.labels)
 
     // Förbered data för ApexCharts
     const options = {
@@ -111,13 +142,32 @@ const fetchAndRenderChart = async () => {
       chart.value.destroy()
     }
 
-    // Skapa nytt diagram
-    chart.value = new ApexCharts(
-      document.querySelector("#chart"),
-      options
-    )
-    chart.value.render()
+    // Vänta lite för att säkerställa att DOM är uppdaterad
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    // Kontrollera att chart-elementet finns innan vi renderar
+    const chartElement = document.querySelector("#chart")
+    console.log('Chart element:', chartElement)
+
+    if (!chartElement) {
+      error.value = 'Chart element hittades inte i DOM'
+      loading.value = false
+      return
+    }
+
+    console.log('Skapar ApexChart med options:', options)
+
+    // Sätt loading till false INNAN vi renderar så elementet blir synligt
     loading.value = false
+
+    // Vänta ett tick för att Vue ska uppdatera DOM
+    await new Promise(resolve => setTimeout(resolve, 10))
+
+    // Skapa nytt diagram
+    chart.value = new ApexCharts(chartElement, options)
+    await chart.value.render()
+
+    console.log('Chart renderat!')
 
   } catch (err) {
     console.error('Fel vid hämtning av data:', err)
@@ -149,11 +199,6 @@ watch(filterType, () => {
 </script>
 
 <template>
-  <h1>Översikt</h1>
-
-  <RouterLink to="/workouts" class="nav-button">
-    Gå till Workouts
-  </RouterLink>
   <div class="chart-container">
     <!-- Filter Section -->
     <div class="filters">
@@ -218,8 +263,159 @@ watch(filterType, () => {
       <div v-if="loading" class="loading">Laddar data...</div>
       <div v-else-if="error" class="error">
         <strong>Fel:</strong> {{ error }}
+        <div v-if="error.includes('Ingen data hittades')" class="help-text">
+          <p>För att se diagram behöver du:</p>
+          <ol>
+            <li>Skapa en aktivitetstyp (t.ex. "Löpning")</li>
+            <li>Lägg till workouts med datum, distans och duration</li>
+            <li>Uppdatera diagrammet</li>
+          </ol>
+        </div>
       </div>
-      <div v-else id="chart"></div>
+      <div id="chart" v-show="!loading && !error"></div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.chart-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.filters {
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.filters h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.filter-group {
+  margin-bottom: 15px;
+}
+
+.filter-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.radio-group {
+  display: flex;
+  gap: 15px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: normal;
+}
+
+select, input[type="text"] {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+select {
+  width: 100%;
+  max-width: 300px;
+}
+
+.date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.date-inputs input {
+  flex: 1;
+  min-width: 140px;
+}
+
+small {
+  display: block;
+  color: #666;
+  margin-top: 5px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #008FFB;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0077d4;
+}
+
+.btn-secondary {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background-color: #d0d0d0;
+}
+
+.chart-wrapper {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  background-color: #fee;
+  color: #c33;
+  padding: 15px;
+  border-radius: 4px;
+  border-left: 4px solid #c33;
+}
+
+.help-text {
+  margin-top: 15px;
+  color: #666;
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.help-text ol {
+  margin: 10px 0 0 20px;
+}
+
+#chart {
+  min-height: 400px;
+}
+</style>
