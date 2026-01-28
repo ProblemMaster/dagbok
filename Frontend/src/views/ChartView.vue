@@ -1,175 +1,206 @@
 <script setup>
-import { ref, onMounted, watch } from "vue"
+import { ref, onMounted, nextTick, watch } from "vue"
 import ApexCharts from "apexcharts"
 import api from "@/api/api"
 
 // State
 const loading = ref(true)
 const error = ref(null)
-const chart = ref(null)
+const charts = ref([]) // Ändrat från chart till charts (array)
 
 // Filter state
-const filterType = ref('all') // 'all' eller 'activity'
+const filterType = ref('all')
 const selectedActivity = ref(null)
 const dateFrom = ref('')
 const dateTo = ref('')
 
-// Lista över aktiviteter (hämtas från backend)
 const activities = ref([])
+
+const normalizeDate = (date) => {
+  if (!date) return null
+  const regex = /^\d{2}-\d{2}-\d{4}$/
+  return regex.test(date) ? date : null
+}
+
+const fetchActivities = async () => {
+  const res = await fetch("http://localhost:8000/activities")
+  activities.value = await res.json()
+}
 
 // Funktion för att hämta och rendera data
 const fetchAndRenderChart = async () => {
+  const from = normalizeDate(dateFrom.value)
+  const to = normalizeDate(dateTo.value)
+
   loading.value = true
   error.value = null
 
-  try {
-    let data
+  // Förstör alla gamla diagram först
+  charts.value.forEach(chart => {
+    if (chart) {
+      chart.destroy()
+    }
+  })
+  charts.value = []
 
+  try {
     // Hämta data baserat på valt filter
     if (filterType.value === 'all') {
-      data = await api.getAllTimeline(dateFrom.value, dateTo.value)
+      // Hämta data för alla aktiviteter
+      if (activities.value.length === 0) {
+        error.value = 'Inga aktiviteter hittades. Skapa aktiviteter först!'
+        loading.value = false
+        return
+      }
+
+      // Sätt loading till false så elementen blir synliga
+      loading.value = false
+      await nextTick()
+
+      // Skapa ett diagram för varje aktivitet
+      for (const activity of activities.value) {
+        try {
+          const data = await api.getActivityTimeline(activity.id, from, to)
+
+          // Hantera array-respons
+          let activityData = Array.isArray(data) ? data[0] : data
+
+          // Kolla om det finns data för denna aktivitet
+          if (!activityData || !activityData.distance || !activityData.duration) {
+            console.log(`Ingen data för ${activity.name}`)
+            continue
+          }
+
+          // Om det inte finns några datapunkter, hoppa över
+          if (activityData.distance.data.length === 0) {
+            continue
+          }
+
+          await renderChart(activityData, `chart-${activity.id}`)
+        } catch (err) {
+          console.error(`Fel för aktivitet ${activity.name}:`, err)
+        }
+      }
+
+      if (charts.value.length === 0) {
+        error.value = 'Ingen data hittades för några aktiviteter i det valda datumintervallet.'
+      }
+
     } else {
+      // Visa diagram för en specifik aktivitet
       if (!selectedActivity.value) {
         error.value = 'Välj en aktivitet'
         loading.value = false
         return
       }
-      data = await api.getActivityTimeline(selectedActivity.value, dateFrom.value, dateTo.value)
-    }
 
-    // Debug: Visa vad backend returnerar
-    console.log('Backend data (raw):', data)
+      const data = await api.getActivityTimeline(selectedActivity.value, from, to)
 
-    // Om backend returnerar en array, ta första elementet
-    if (Array.isArray(data)) {
-      if (data.length === 0) {
-        error.value = 'Ingen data hittades. Lägg till workouts i databasen först!'
+      // Hantera array-respons
+      let activityData = Array.isArray(data) ? data[0] : data
+
+      if (!activityData) {
+        error.value = 'Ingen data returnerades från backend'
         loading.value = false
         return
       }
-      console.log('Data är en array med', data.length, 'element')
-      data = data[0]
-    }
 
-    console.log('Data efter array-check:', data)
+      if (!activityData.distance || !activityData.duration) {
+        error.value = 'Backend returnerade ogiltig data-struktur.'
+        loading.value = false
+        return
+      }
 
-    // Kontrollera om data är null eller undefined
-    if (!data) {
-      error.value = 'Ingen data returnerades från backend'
+      if (activityData.distance.data.length === 0) {
+        error.value = 'Ingen data hittades för vald aktivitet i det valda datumintervallet.'
+        loading.value = false
+        return
+      }
+
       loading.value = false
-      return
+      await nextTick()
+
+      await renderChart(activityData, 'chart-single')
     }
-
-    // Kontrollera om data har rätt struktur
-    if (!data.distance || !data.duration) {
-      console.error('Data saknar distance eller duration:', data)
-      error.value = 'Backend returnerade ogiltig data-struktur. Saknar distance eller duration.'
-      loading.value = false
-      return
-    }
-
-    console.log('Distance data:', data.distance)
-    console.log('Duration data:', data.duration)
-    console.log('Labels:', data.labels)
-
-    // Förbered data för ApexCharts
-    const options = {
-      series: [
-        {
-          name: `Distans (${data.distance.unit})`,
-          data: data.distance.data.map(Number),
-          type: 'column'
-        },
-        {
-          name: `Duration (${data.duration.unit})`,
-          data: data.duration.data,
-          type: 'line'
-        }
-      ],
-      chart: {
-        type: "line",
-        height: 400,
-        toolbar: {
-          show: true
-        }
-      },
-      title: {
-        text: data.activity_name,
-        align: 'left',
-        style: {
-          fontSize: '18px',
-          fontWeight: 'bold'
-        }
-      },
-      xaxis: {
-        categories: data.labels,
-        title: {
-          text: 'Datum'
-        }
-      },
-      yaxis: [
-        {
-          title: {
-            text: `Distans (${data.distance.unit})`
-          },
-          labels: {
-            formatter: (val) => val.toFixed(2)
-          }
-        },
-        {
-          opposite: true,
-          title: {
-            text: `Duration (${data.duration.unit})`
-          }
-        }
-      ],
-      stroke: {
-        width: [0, 4]
-      },
-      dataLabels: {
-        enabled: true,
-        enabledOnSeries: [1]
-      },
-      colors: ['#008FFB', '#00E396']
-    }
-
-    // Förstör gammalt diagram om det finns
-    if (chart.value) {
-      chart.value.destroy()
-    }
-
-    // Vänta lite för att säkerställa att DOM är uppdaterad
-    await new Promise(resolve => setTimeout(resolve, 0))
-
-    // Kontrollera att chart-elementet finns innan vi renderar
-    const chartElement = document.querySelector("#chart")
-    console.log('Chart element:', chartElement)
-
-    if (!chartElement) {
-      error.value = 'Chart element hittades inte i DOM'
-      loading.value = false
-      return
-    }
-
-    console.log('Skapar ApexChart med options:', options)
-
-    // Sätt loading till false INNAN vi renderar så elementet blir synligt
-    loading.value = false
-
-    // Vänta ett tick för att Vue ska uppdatera DOM
-    await new Promise(resolve => setTimeout(resolve, 10))
-
-    // Skapa nytt diagram
-    chart.value = new ApexCharts(chartElement, options)
-    await chart.value.render()
-
-    console.log('Chart renderat!')
 
   } catch (err) {
-    console.error('Fel vid hämtning av data:', err)
+    console.error('Error:', err)
     error.value = err.message
     loading.value = false
   }
+}
+
+// Hjälpfunktion för att rendera ett enskilt diagram
+const renderChart = async (data, elementId) => {
+  const options = {
+    series: [
+      {
+        name: `Distans (${data.distance.unit})`,
+        data: data.distance.data.map(Number),
+        type: 'column'
+      },
+      {
+        name: `Duration (${data.duration.unit})`,
+        data: data.duration.data,
+        type: 'line'
+      }
+    ],
+    chart: {
+      type: "line",
+      height: 400,
+      toolbar: {
+        show: true
+      }
+    },
+    title: {
+      text: data.activity_name,
+      align: 'left',
+      style: {
+        fontSize: '18px',
+        fontWeight: 'bold'
+      }
+    },
+    xaxis: {
+      categories: data.labels,
+      title: {
+        text: 'Datum'
+      }
+    },
+    yaxis: [
+      {
+        title: {
+          text: `Distans (${data.distance.unit})`
+        },
+        labels: {
+          formatter: (val) => val.toFixed(2)
+        }
+      },
+      {
+        opposite: true,
+        title: {
+          text: `Duration (${data.duration.unit})`
+        }
+      }
+    ],
+    stroke: {
+      width: [0, 4]
+    },
+    dataLabels: {
+      enabled: true,
+      enabledOnSeries: [1]
+    },
+    colors: ['#008FFB', '#00E396']
+  }
+
+  const chartElement = document.querySelector(`#${elementId}`)
+  if (!chartElement) {
+    console.error(`Chart element #${elementId} hittades inte`)
+    return
+  }
+
+  const chart = new ApexCharts(chartElement, options)
+  await chart.render()
+  charts.value.push(chart)
 }
 
 // Återställ filter
@@ -181,36 +212,20 @@ const resetFilters = () => {
   fetchAndRenderChart()
 }
 
-// Navigera till workouts-sidan
-const goToWorkouts = () => {
-  // Ändra '/workouts' till din faktiska route
-  window.location.href = '/workouts'
-  // Eller om du använder Vue Router:
-  // import { useRouter } from 'vue-router'
-  // const router = useRouter()
-  // router.push('/workouts')
-}
+watch(filterType, (newValie) => {
+  if (newValie === 'all') {
+    selectedActivity.value = null
+    fetchAndRenderChart()
+  }
+})
 
 // Hämta data vid första laddning
-onMounted(async () => {
-  // Hämta tillgängliga aktiviteter från backend
-  try {
-    activities.value = await api.getActivities()
-    console.log('Aktiviteter hämtade:', activities.value)
-  } catch (err) {
-    console.error('Kunde inte hämta aktiviteter:', err)
-  }
-
-  // Rendera diagram med alla aktiviteter som default
-  fetchAndRenderChart()
+onMounted(() => {
+  fetchActivities().then(() => {
+    fetchAndRenderChart()
+  })
 })
 
-// Bevaka filtertyp-ändringar
-watch(filterType, () => {
-  if (filterType.value === 'all') {
-    selectedActivity.value = null
-  }
-})
 </script>
 
 <template>
@@ -244,10 +259,10 @@ watch(filterType, () => {
       <!-- Välj aktivitet (visas bara om filterType är 'activity') -->
       <div class="filter-group" v-if="filterType === 'activity'">
         <label for="activity-select">Välj aktivitet:</label>
-        <select id="activity-select" v-model="selectedActivity">
+        <select v-model="selectedActivity">
           <option :value="null">-- Välj aktivitet --</option>
-          <option v-for="activity in activities" :key="activity.id" :value="activity.id">
-            {{ activity.name }}
+          <option v-for="act in activities" :key="act.id" :value="act.id">
+            {{ act.name }}
           </option>
         </select>
       </div>
@@ -294,7 +309,20 @@ watch(filterType, () => {
           </ol>
         </div>
       </div>
-      <div id="chart" v-show="!loading && !error"></div>
+
+      <!-- Visa flera diagram när filterType är 'all' -->
+      <div v-if="!loading && !error && filterType === 'all'">
+        <div
+          v-for="activity in activities"
+          :key="activity.id"
+          class="chart-item"
+        >
+          <div :id="`chart-${activity.id}`"></div>
+        </div>
+      </div>
+
+      <!-- Visa ett diagram när en specifik aktivitet är vald -->
+      <div v-if="!loading && !error && filterType === 'activity'" id="chart-single"></div>
     </div>
   </div>
 </template>
@@ -457,7 +485,12 @@ small {
   margin: 10px 0 0 20px;
 }
 
-#chart {
+.chart-item {
+  margin-bottom: 40px;
   min-height: 400px;
+}
+
+.chart-item:last-child {
+  margin-bottom: 0;
 }
 </style>

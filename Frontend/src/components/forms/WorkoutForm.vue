@@ -4,9 +4,13 @@
     <div>
       <label for="type">Träning</label>
       <br>
-      <select id="type" v-model="form.type" required>
-        <option disabled value="">Välj typ</option>
-        <option v-for="activity in activities" :key="activity.id" :value="activity.name">
+      <select v-model.number="form.activity_id" required>
+        <option disabled value="">Välj aktivitet</option>
+        <option
+          v-for="activity in activities"
+          :key="activity.id"
+          :value="activity.id"
+          >
           {{ activity.name }}
         </option>
       </select>
@@ -29,8 +33,7 @@
       <label for="date">Datum</label>
       <br>
       <input type="date"
-        id="date"
-        v-model="form.date"
+        @change="formatDate"
         required />
     </div>
 
@@ -39,15 +42,14 @@
       <br>
       <input
         type ="number"
-        id="time"
-        v-model.number="form.time"
+        v-model.number="form.duration_value"
         @keypress="onlyNumbers"
         />
 
-        <select id="time_unit" v-model = "form.time_unit">
+        <select v-model = "form.duration_unit">
           <option value="">Välj enhet</option>
-          <option>Minuter</option>
-          <option>Timmar</option>
+          <option value="min">Minuter</option>
+          <option value="h">Timmar</option>
         </select>
     </div>
 
@@ -56,33 +58,23 @@
       <br>
       <input
         type ="number"
-        id="length"
-        v-model.number="form.length"
+        v-model.number="form.distance_value"
         @keypress="onlyNumbers"
         />
 
-        <select id="length_unit" v-model = "form.length_unit">
+        <select v-model = "form.distance_unit">
           <option value="">Välj enhet</option>
-          <option>Kilometer</option>
-          <option>Meter</option>
+          <option value="km">Kilometer</option>
+          <option value="m">Meter</option>
         </select>
     </div>
 
     <div>
       <label for="difficulty">Svårighetsgrad</label>
       <br>
-      <select id="difficulty" v-model="form.difficulty" required>
+      <select v-model.number="form.effort_level" required>
         <option disabled value="">Välj hur jobbigt det var</option>
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-        <option>6</option>
-        <option>7</option>
-        <option>8</option>
-        <option>9</option>
-        <option>10</option>
+        <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
       </select>
     </div>
 
@@ -107,7 +99,6 @@ const fetchActivities = async () => {
   try {
     const response = await fetch('http://localhost:8000/activities')
     if (!response.ok) throw new Error('Något gick fel vid hämtning av aktiviteter')
-    console.log(response)
     activities.value = await response.json()
   } catch (error) {
     console.error(error)
@@ -127,16 +118,20 @@ function onlyNumbers(event) {
 
 // Form-data
 const form = reactive({
-  type: "",
-  duration: "",
+  activity_id: null,
   date: "",
-  time: "",
-  time_unit: "",
-  length: "",
-  length_unit: "",
-  difficulty: "",
-
+  description: "",
+  effort_level: null,
+  distance_value: null,
+  distance_unit: "",
+  duration_value: null,
+  duration_unit: ""
 })
+
+const formatDate = (e) => {
+  const [y, m, d] = e.target.value.split("-")
+  form.date = `${d}-${m}-${y}`
+}
 
 // Feedback
 const success = ref(false)
@@ -149,7 +144,7 @@ const submitForm = async () => {
 
   try {
     //TODO: API anrop
-    const response = await fetch("http://localhost:8000/workouts", {
+    const response = await fetch("http://localhost:5173/workouts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -157,7 +152,7 @@ const submitForm = async () => {
       body: JSON.stringify(form)
     })
 
-    if (!response.ok) throw new Error("Servern svarade inte som förväntat")
+    if (!response.ok) throw new Error("Misslyckades att spara workout")
 
     const data = await response.json()
     console.log("Svar från backend:", data)
@@ -166,17 +161,18 @@ const submitForm = async () => {
 
     success.value = true
 
+      form.activity_id = null,
+      form.date = "",
+      form.description = "",
+      form.effort_level = null,
+      form.distance_value = null,
+      form.distance_unit = "",
+      form.duration_value = null,
+      form.duration_unit = ""
+
     // Byt view efter att ha sparat
     router.push('/charts');
-    // Reset form
-      form.type = ""
-      form.duration = ""
-      form.date = ""
-      form.time = ""
-      form.time_unit = ""
-      form.length = ""
-      form.length_unit = ""
-      form.difficulty = ""
+
   } catch (err) {
     console.error(err)
     error.value = true

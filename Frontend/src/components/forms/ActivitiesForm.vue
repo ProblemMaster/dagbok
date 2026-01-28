@@ -31,7 +31,6 @@ const router = useRouter()
 // Form-data
 const form = reactive({
   name: "",
-  description: "",
 })
 
 // Feedback
@@ -45,7 +44,7 @@ const submitForm = async () => {
 
   try {
     //TODO: API anrop
-    const response = await fetch("http://localhost:8000", {
+    const response = await fetch("http://localhost:8000/activities", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -53,14 +52,14 @@ const submitForm = async () => {
       body: JSON.stringify(form)
     })
 
-    if (!response.ok) throw new Error("Servern svarade inte som förväntat")
+    if (!response.ok) throw new Error("Misslyckades att spara aktivitet")
 
     const data = await response.json()
     console.log("Svar från backend:", data)
       success.value = true
 
     // Byt view efter att ha sparat
-    this.$router.push('/aktivitet');
+    router.push('/workouts');
 
     // Reset form
     form.name = ""
