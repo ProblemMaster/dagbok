@@ -18,6 +18,7 @@ const dateTo = ref('')
 
 const activities = ref([])
 const activitiesWithData = ref([])
+const activityStats = ref({}) // NY: Håller statistik för varje aktivitet
 
 const normalizeDate = (date) => {
   if (!date) return null
@@ -26,11 +27,17 @@ const normalizeDate = (date) => {
 }
 
 const fetchActivities = async () => {
+  const res = await fetch("http://localhost:8000/activities")
+  activities.value = await res.json()
+}
+
+// NY: Hämta statistik för en aktivitet
+const fetchActivityStats = async (activityId) => {
   try {
-    activities.value = await api.getActivities()
+    const stats = await api.getActivityStatistics(activityId)
+    activityStats.value[activityId] = stats
   } catch (err) {
-    console.error(err)
-    activities.value = []
+    console.error(`Kunde inte hämta statistik för aktivitet ${activityId}:`, err)
   }
 }
 
@@ -51,10 +58,10 @@ const handleDownloadPdf = async () => {
     const to = normalizeDate(dateTo.value)
 
     if (from) {
-      params.append('from', from)  // Ändrat från 'date_from' till 'from'
+      params.append('from', from)
     }
     if (to) {
-      params.append('to', to)  // Ändrat från 'date_to' till 'to'
+      params.append('to', to)
     }
 
     // Hämta PDF med filtrering
@@ -96,6 +103,7 @@ const fetchAndRenderChart = async () => {
   loading.value = true
   error.value = null
   activitiesWithData.value = []
+  activityStats.value = {} // Återställ statistik
 
   // Förstör alla gamla diagram först
   charts.value.forEach(chart => {
@@ -140,6 +148,9 @@ const fetchAndRenderChart = async () => {
 
           activitiesWithData.value.push(activity)
 
+          // Hämta statistik för denna aktivitet
+          await fetchActivityStats(activity.id)
+
           await nextTick()
 
           await renderChart(activityData, `chart-${activity.id}`)
@@ -182,6 +193,9 @@ const fetchAndRenderChart = async () => {
         loading.value = false
         return
       }
+
+      // Hämta statistik för den valda aktiviteten
+      await fetchActivityStats(selectedActivity.value)
 
       loading.value = false
       await nextTick()
@@ -396,12 +410,30 @@ onMounted(() => {
           :key="activity.id"
           class="chart-item"
         >
+          <!-- Statistik-box OVANFÖR diagrammet -->
+          <div v-if="activityStats[activity.id]" class="stats-box">
+            <div class="stat-item">
+              <span class="stat-label">Genomsnittlig ansträngning för {{ activity.name }}:</span>
+              <span class="stat-value">{{ activityStats[activity.id].average_effort }} / 10</span>
+            </div>
+          </div>
+
           <div :id="`chart-${activity.id}`"></div>
         </div>
       </div>
 
       <!-- Visa ett diagram när en specifik aktivitet är vald -->
-      <div v-if="!loading && !error && filterType === 'activity'" id="chart-single"></div>
+      <div v-if="!loading && !error && filterType === 'activity'">
+        <!-- Statistik-box OVANFÖR diagrammet -->
+        <div v-if="activityStats[selectedActivity]" class="stats-box">
+          <div class="stat-item">
+            <span class="stat-label">Genomsnittlig ansträngning:</span>
+            <span class="stat-value">{{ activityStats[selectedActivity].average_effort }} / 10</span>
+          </div>
+        </div>
+
+        <div id="chart-single"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -590,10 +622,36 @@ small {
 
 .chart-item {
   margin-bottom: 40px;
-  min-height: 400px;
 }
 
 .chart-item:last-child {
   margin-bottom: 0;
+}
+
+/* NY: Statistik-box styling */
+.stats-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.stat-value {
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
 }
 </style>
