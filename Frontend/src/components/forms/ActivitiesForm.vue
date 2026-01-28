@@ -59,7 +59,7 @@ const submitForm = async () => {
   }
 }
 const avbryt = () => {
-  router.push('/workouts'); // eller t.ex. '/aktiviteter', '/hem' etc.
+  router.push('/workouts');
 };
 
 </script>

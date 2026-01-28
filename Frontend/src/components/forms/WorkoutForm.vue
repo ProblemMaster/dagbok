@@ -79,6 +79,7 @@
     </div>
 
     <button type="submit">Spara träning</button>
+    <button type="button" @click="avbryt">Avbryt</button>
 
     <!-- Feedback -->
     <p v-if="success" class="success-msg">Workout skickad!</p>
@@ -166,6 +167,10 @@ const submitForm = async () => {
     error.value = true
   }
 }
+
+const avbryt = () => {
+  router.push('/');
+};
 </script>
 
 <style scoped>
