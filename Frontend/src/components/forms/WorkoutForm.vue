@@ -89,6 +89,7 @@
 <script setup>
 import { reactive, ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
+import api from "@/api/api"
 
 const router = useRouter()
 
@@ -137,41 +138,29 @@ const formatDate = (e) => {
 const success = ref(false)
 const error = ref(false)
 
-// Submit-funktion med fetch
+// Submit-funktion som använder api.createWorkout
 const submitForm = async () => {
   success.value = false
   error.value = false
 
   try {
-    //TODO: API anrop
-    const response = await fetch("http://localhost:5173/workouts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(form)
-    })
-
-    if (!response.ok) throw new Error("Misslyckades att spara workout")
-
-    const data = await response.json()
+    const data = await api.createWorkout(form)
     console.log("Svar från backend:", data)
-
-
 
     success.value = true
 
-      form.activity_id = null,
-      form.date = "",
-      form.description = "",
-      form.effort_level = null,
-      form.distance_value = null,
-      form.distance_unit = "",
-      form.duration_value = null,
-      form.duration_unit = ""
+    // Nollställ formuläret
+    form.activity_id = null
+    form.date = ""
+    form.description = ""
+    form.effort_level = null
+    form.distance_value = null
+    form.distance_unit = ""
+    form.duration_value = null
+    form.duration_unit = ""
 
     // Byt view efter att ha sparat
-    router.push('/charts');
+    router.push('/charts')
 
   } catch (err) {
     console.error(err)
