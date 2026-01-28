@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from "vue"
+import { useRouter } from "vue-router"
 import ApexCharts from "apexcharts"
 import api from "@/api/api"
 
@@ -210,6 +211,12 @@ const resetFilters = () => {
   dateFrom.value = ''
   dateTo.value = ''
   fetchAndRenderChart()
+}
+
+// Router-funktion för att navigera till /workouts
+const router = useRouter()
+const goToWorkouts = () => {
+  router.push('/workouts')
 }
 
 watch(filterType, (newValie) => {
