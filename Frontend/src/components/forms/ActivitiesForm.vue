@@ -24,6 +24,7 @@
 <script setup>
 import { reactive, ref } from "vue"
 import { useRouter } from 'vue-router'
+import api from "@/api/api"
 
 
 const router = useRouter()
@@ -37,29 +38,18 @@ const form = reactive({
 const success = ref(false)
 const error = ref(false)
 
-// Submit med fetch
+// Submit med api.createActivity
 const submitForm = async () => {
   success.value = false
   error.value = false
 
   try {
-    //TODO: API anrop
-    const response = await fetch("http://localhost:8000/activities", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(form)
-    })
-
-    if (!response.ok) throw new Error("Misslyckades att spara aktivitet")
-
-    const data = await response.json()
+    const data = await api.createActivity(form)
     console.log("Svar från backend:", data)
-      success.value = true
+    success.value = true
 
     // Byt view efter att ha sparat
-    router.push('/workouts');
+    router.push('/workouts')
 
     // Reset form
     form.name = ""

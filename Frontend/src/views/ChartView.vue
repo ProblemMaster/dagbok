@@ -25,8 +25,12 @@ const normalizeDate = (date) => {
 }
 
 const fetchActivities = async () => {
-  const res = await fetch("http://localhost:8000/activities")
-  activities.value = await res.json()
+  try {
+    activities.value = await api.getActivities()
+  } catch (err) {
+    console.error(err)
+    activities.value = []
+  }
 }
 
 // Funktion för att hämta och rendera data

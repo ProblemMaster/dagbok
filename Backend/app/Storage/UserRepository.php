@@ -18,3 +18,4 @@
 
         public function deleteAllRefreshTokens(User $user);
     }
+0

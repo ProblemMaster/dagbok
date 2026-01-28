@@ -95,14 +95,13 @@ const router = useRouter()
 
 const activities = ref([])
 
-// Funktion för att hämta aktiviteter från bakcend
+// Funktion för att hämta aktiviteter från backend via api.js
 const fetchActivities = async () => {
   try {
-    const response = await fetch('http://localhost:8000/activities')
-    if (!response.ok) throw new Error('Något gick fel vid hämtning av aktiviteter')
-    activities.value = await response.json()
+    activities.value = await api.getActivities()
   } catch (error) {
     console.error(error)
+    activities.value = []
   }
 }
 
