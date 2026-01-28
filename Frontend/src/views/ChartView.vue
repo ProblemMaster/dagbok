@@ -16,6 +16,7 @@ const dateFrom = ref('')
 const dateTo = ref('')
 
 const activities = ref([])
+const activitiesWithData = ref([])
 
 const normalizeDate = (date) => {
   if (!date) return null
@@ -35,6 +36,7 @@ const fetchAndRenderChart = async () => {
 
   loading.value = true
   error.value = null
+  activitiesWithData.value = []
 
   // Förstör alla gamla diagram först
   charts.value.forEach(chart => {
@@ -76,6 +78,10 @@ const fetchAndRenderChart = async () => {
           if (activityData.distance.data.length === 0) {
             continue
           }
+
+          activitiesWithData.value.push(activity)
+
+          await nextTick()
 
           await renderChart(activityData, `chart-${activity.id}`)
         } catch (err) {
@@ -320,7 +326,7 @@ onMounted(() => {
       <!-- Visa flera diagram när filterType är 'all' -->
       <div v-if="!loading && !error && filterType === 'all'">
         <div
-          v-for="activity in activities"
+          v-for="activity in activitiesWithData"
           :key="activity.id"
           class="chart-item"
         >
