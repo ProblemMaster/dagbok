@@ -6,7 +6,6 @@ use App\Models\Workout;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Dompdf\Options;
-//use Illuminate\Support\Carbon;
 use Carbon\Carbon;
 use Laravel\Lumen\Routing\Controller;
 
@@ -14,6 +13,12 @@ class WorkoutPdfController extends Controller {
     public function export(Request $request) {
         $query = Workout::with('activity');
 
+        // Filtrera på aktivitet om activity_id skickas med
+        if ($request->has('activity_id')) {
+            $query->where('activity_id', $request->activity_id);
+        }
+
+        // Filtrera på från-datum
         if ($request->has('from')) {
             try {
                 $from = Carbon::createFromFormat('d-m-Y', $request->from)->format('Y-m-d');
@@ -23,6 +28,7 @@ class WorkoutPdfController extends Controller {
             }
         }
 
+        // Filtrera på till-datum
         if ($request->has('to')) {
             try {
                 $to = Carbon::createFromFormat('d-m-Y', $request->to)->format('Y-m-d');
@@ -33,7 +39,6 @@ class WorkoutPdfController extends Controller {
         }
 
         $workouts = $query->orderBy('date')->get();
-
 
         // Skapa html
         $html = view('pdf.workouts', compact('workouts'))->render();

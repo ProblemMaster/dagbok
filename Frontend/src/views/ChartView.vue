@@ -7,7 +7,8 @@ import api from "@/api/api"
 // State
 const loading = ref(true)
 const error = ref(null)
-const charts = ref([]) // Ändrat från chart till charts (array)
+const charts = ref([])
+const downloadingPdf = ref(false)
 
 // Filter state
 const filterType = ref('all')
@@ -27,6 +28,60 @@ const normalizeDate = (date) => {
 const fetchActivities = async () => {
   const res = await fetch("http://localhost:8000/activities")
   activities.value = await res.json()
+}
+
+const handleDownloadPdf = async () => {
+  try {
+    downloadingPdf.value = true
+
+    // Bygg URL med query parameters baserat på filter
+    const params = new URLSearchParams()
+
+    // Lägg till aktivitets-filter om en specifik aktivitet är vald
+    if (filterType.value === 'activity' && selectedActivity.value) {
+      params.append('activity_id', selectedActivity.value)
+    }
+
+    // Lägg till datumfilter om de är satta
+    const from = normalizeDate(dateFrom.value)
+    const to = normalizeDate(dateTo.value)
+
+    if (from) {
+      params.append('from', from)  // Ändrat från 'date_from' till 'from'
+    }
+    if (to) {
+      params.append('to', to)  // Ändrat från 'date_to' till 'to'
+    }
+
+    // Hämta PDF med filtrering
+    const url = `http://localhost:8000/workouts/pdf?${params.toString()}`
+    const response = await fetch(url)
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+
+    const blob = await response.blob()
+
+    // Skapa filnamn baserat på filter
+    let filename = 'workouts'
+    if (filterType.value === 'activity' && selectedActivity.value) {
+      const activity = activities.value.find(a => a.id === selectedActivity.value)
+      if (activity) {
+        filename = `workouts_${activity.name.toLowerCase().replace(/\s+/g, '_')}`
+      }
+    }
+    if (from || to) {
+      filename += `_${from || 'start'}_till_${to || 'slut'}`
+    }
+    filename += '.pdf'
+
+    api.downloadPdf(blob, filename)
+
+  } catch (err) {
+    console.error('Fel vid nedladdning av PDF:', err)
+    alert('Det gick inte att ladda ner PDF. Försök igen.')
+  } finally {
+    downloadingPdf.value = false
+  }
 }
 
 // Funktion för att hämta och rendera data
@@ -225,8 +280,8 @@ const goToWorkouts = () => {
   router.push('/workouts')
 }
 
-watch(filterType, (newValie) => {
-  if (newValie === 'all') {
+watch(filterType, (newValue) => {
+  if (newValue === 'all') {
     selectedActivity.value = null
     fetchAndRenderChart()
   }
@@ -247,6 +302,13 @@ onMounted(() => {
     <div class="navigation">
       <button @click="goToWorkouts" class="btn-nav">
         📋 Gå till Workouts
+      </button>
+      <button
+        @click="handleDownloadPdf"
+        class="btn-download"
+        :disabled="downloadingPdf"
+      >
+        {{ downloadingPdf ? '📥 Laddar ner...' : '📥 Ladda ner PDF' }}
       </button>
     </div>
 
@@ -349,6 +411,9 @@ onMounted(() => {
 
 .navigation {
   margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .btn-nav {
@@ -365,6 +430,27 @@ onMounted(() => {
 
 .btn-nav:hover {
   background-color: #45a049;
+}
+
+.btn-download {
+  padding: 12px 24px;
+  background-color: #FF9800;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-download:hover:not(:disabled) {
+  background-color: #FB8C00;
+}
+
+.btn-download:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .filters {
