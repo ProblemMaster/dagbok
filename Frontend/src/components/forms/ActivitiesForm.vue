@@ -44,8 +44,7 @@ const submitForm = async () => {
   error.value = false
 
   try {
-    const data = await api.createActivity(form)
-    console.log("Svar från backend:", data)
+    await api.createActivity(form)
     success.value = true
 
     // Byt view efter att ha sparat
@@ -53,8 +52,7 @@ const submitForm = async () => {
 
     // Reset form
     form.name = ""
-  } catch (err) {
-    console.error(err)
+  } catch {
     error.value = true
   }
 }
