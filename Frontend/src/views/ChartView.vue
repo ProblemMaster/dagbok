@@ -36,8 +36,8 @@ const fetchActivityStats = async (activityId) => {
   try {
     const stats = await api.getActivityStatistics(activityId)
     activityStats.value[activityId] = stats
-  } catch (err) {
-    console.error(`Kunde inte hämta statistik för aktivitet ${activityId}:`, err)
+  } catch {
+    activityStats.value[activityId] = null
   }
 }
 
@@ -87,8 +87,7 @@ const handleDownloadPdf = async () => {
 
     api.downloadPdf(blob, filename)
 
-  } catch (err) {
-    console.error('Fel vid nedladdning av PDF:', err)
+  } catch  {
     alert('Det gick inte att ladda ner PDF. Försök igen.')
   } finally {
     downloadingPdf.value = false
@@ -137,7 +136,6 @@ const fetchAndRenderChart = async () => {
 
           // Kolla om det finns data för denna aktivitet
           if (!activityData || !activityData.distance || !activityData.duration) {
-            console.log(`Ingen data för ${activity.name}`)
             continue
           }
 
@@ -154,8 +152,8 @@ const fetchAndRenderChart = async () => {
           await nextTick()
 
           await renderChart(activityData, `chart-${activity.id}`)
-        } catch (err) {
-          console.error(`Fel för aktivitet ${activity.name}:`, err)
+        } catch {
+          // Ignorera fel för individuell aktivitet
         }
       }
 
@@ -204,12 +202,10 @@ const fetchAndRenderChart = async () => {
     }
 
   } catch (err) {
-    console.error('Error:', err)
     error.value = err.message
     loading.value = false
   }
 }
-
 // Hjälpfunktion för att rendera ett enskilt diagram
 const renderChart = async (data, elementId) => {
   const options = {
@@ -274,7 +270,7 @@ const renderChart = async (data, elementId) => {
 
   const chartElement = document.querySelector(`#${elementId}`)
   if (!chartElement) {
-    console.error(`Chart element #${elementId} hittades inte`)
+    error.value = `Chart element #${elementId} hittades inte`
     return
   }
 
@@ -319,14 +315,14 @@ onMounted(() => {
     <!-- Navigation -->
     <div class="navigation">
       <button @click="goToWorkouts" class="btn-nav">
-        📋 Gå till Workouts
+         Gå till Workouts
       </button>
       <button
         @click="handleDownloadPdf"
         class="btn-download"
         :disabled="downloadingPdf"
       >
-        {{ downloadingPdf ? '📥 Laddar ner...' : '📥 Ladda ner PDF' }}
+        {{ downloadingPdf ? ' Laddar ner...' : ' Ladda ner PDF' }}
       </button>
     </div>
 

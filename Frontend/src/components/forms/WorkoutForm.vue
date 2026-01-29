@@ -100,8 +100,7 @@ const activities = ref([])
 const fetchActivities = async () => {
   try {
     activities.value = await api.getActivities()
-  } catch (error) {
-    console.error(error)
+  } catch {
     activities.value = []
   }
 }
@@ -144,8 +143,7 @@ const submitForm = async () => {
   error.value = false
 
   try {
-    const data = await api.createWorkout(form)
-    console.log("Svar från backend:", data)
+    await api.createWorkout(form)
 
     success.value = true
 
@@ -162,8 +160,7 @@ const submitForm = async () => {
     // Byt view efter att ha sparat
     router.push('/charts')
 
-  } catch (err) {
-    console.error(err)
+  } catch {
     error.value = true
   }
 }

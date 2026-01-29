@@ -3,8 +3,8 @@
     <h1>404</h1>
     <p>Sidan du söker finns inte.</p>
 
-    <RouterLink to="/activities">
-      Gå till Activities
+    <RouterLink to="/charts">
+      Gå till startsidan
     </RouterLink>
   </div>
 </template>
