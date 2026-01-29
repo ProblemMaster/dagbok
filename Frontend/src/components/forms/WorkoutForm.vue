@@ -174,9 +174,96 @@ const avbryt = () => {
 .workout-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  max-width: 400px;
+  gap: 1.5rem;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+.workout-form > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5 rem;
+}
+
+label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="date"],
+input[type=number],
+select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: Arial, sant-serif;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+select:focus {
+  outline: none;
+  border-color: #008FFB;
+  box-shadow: 0 0 0 3px rgba (o, 143, 251, 0.1);
+}
+
+input[type="number"] {
+  width: 120px;
+  margin-right: 0.5rem;
+}
+
+select {
+  cursor: pointer;
+  min-width: 150px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 0.5rem;
+}
+
+button[type="submit"]:hover {
+  background-color: #0077d4;
+}
+
+button[type="button"] {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+button[type="button"]:hover {
+  background-color: #d0d0d0;
+}
+
+a {
+  color: #008FFB;
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #0077d4;
+  text-decoration: underline;
+}
+
 
 .success-msg {
   color: green;
