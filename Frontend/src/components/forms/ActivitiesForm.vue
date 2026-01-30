@@ -18,6 +18,7 @@
     <!-- Feedback -->
     <p v-if="success" class="success-msg">Activity skickad!</p>
     <p v-if="error" class="error-msg">Något gick fel. Försök igen.</p>
+    <p v-if="validationError" class="validation-msg">{{ validationError }}</p>
   </form>
 </template>
 
@@ -37,6 +38,7 @@ const form = reactive({
 // Feedback
 const success = ref(false)
 const error = ref(false)
+const validationError = ref('')
 
 // Submit med api.createActivity
 const submitForm = async () => {
@@ -52,7 +54,15 @@ const submitForm = async () => {
 
     // Reset form
     form.name = ""
-  } catch {
+  } catch (err) {
+    // If backend returned validation errors (422), show specific message
+    if (err && err.status === 422 && err.body && err.body.errors && err.body.errors.name) {
+      validationError.value = Array.isArray(err.body.errors.name)
+        ? err.body.errors.name.join(', ')
+        : String(err.body.errors.name)
+      return
+    }
+
     error.value = true
   }
 }
@@ -76,5 +86,9 @@ const avbryt = () => {
 
 .error-msg {
   color: red;
+}
+
+.validation-msg {
+  color: #b35e00;
 }
 </style>

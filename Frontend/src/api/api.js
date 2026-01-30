@@ -6,7 +6,7 @@ async function parseJsonSafe(response) {
   if (!text) return null
   try {
     return JSON.parse(text)
-  } catch (e) {
+  } catch {
     throw new Error(`Invalid JSON response (status ${response.status})`)
   }
 }
@@ -27,7 +27,13 @@ export default {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(activityData)
     })
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    if (!response.ok) {
+      const body = await parseJsonSafe(response).catch(() => null)
+      const err = new Error(`HTTP error! status: ${response.status}`)
+      err.status = response.status
+      err.body = body
+      throw err
+    }
     return await parseJsonSafe(response)
   },
 
