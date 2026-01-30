@@ -8,15 +8,19 @@ class AddDescriptionToWorkoutsTable extends Migration
 {
     public function up()
     {
-        Schema::table('workouts', function (Blueprint $table) {
-            $table->text('description')->nullable()->after('date');
-        });
+        if (!Schema::hasColumn('workouts', 'description')) {
+            Schema::table('workouts', function (Blueprint $table) {
+                $table->text('description')->nullable()->after('date');
+            });
+        }
     }
 
     public function down()
     {
-        Schema::table('workouts', function (Blueprint $table) {
-            $table->dropColumn('description');
-        });
+        if (Schema::hasColumn('workouts', 'description')) {
+            Schema::table('workouts', function (Blueprint $table) {
+                $table->dropColumn('description');
+            });
+        }
     }
 }

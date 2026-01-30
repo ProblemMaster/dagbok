@@ -181,7 +181,7 @@ const fetchAndRenderChart = async () => {
       }
 
       if (!activityData.distance || !activityData.duration) {
-        error.value = 'Backend returnerade ogiltig data-struktur.'
+        error.value = 'Backend returnerade ogiltig datastruktur.'
         loading.value = false
         return
       }
@@ -265,7 +265,7 @@ const renderChart = async (data, elementId) => {
       enabled: true,
       enabledOnSeries: [1]
     },
-    colors: ['#008FFB', '#00E396']
+    colors: ['#008FFB', '#00E396'],
   }
 
   const chartElement = document.querySelector(`#${elementId}`)

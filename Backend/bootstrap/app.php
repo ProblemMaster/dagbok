@@ -6,6 +6,28 @@ require_once __DIR__.'/../vendor/autoload.php';
     dirname(__DIR__)
 ))->bootstrap();
 
+// Helpers for path resolution in Lumen (public_path and database_path)
+if (!function_exists('public_path')) {
+    function public_path($path = '') {
+        $base = dirname(__DIR__);
+        if ($path) {
+            return $base . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
+        }
+        return $base . DIRECTORY_SEPARATOR . 'public';
+    }
+}
+
+if (!function_exists('database_path')) {
+    function database_path($path = '') {
+        $base = dirname(__DIR__);
+        $dir = $base . DIRECTORY_SEPARATOR . 'database';
+        if ($path) {
+            return $dir . DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
+        }
+        return $dir;
+    }
+}
+
 date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
 
 /*

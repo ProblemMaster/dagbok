@@ -12,6 +12,29 @@ En enkel träningsdagbok med en Lumen-backend och en Vue 3 / Vite-frontend.
 - Node.js 16+ och npm
 - SQLite/MySQL (konfigureras via .env)
 
+Quick-start (inbyggd SQLite för demo)
+
+1. Byt till backend-mappen och kopiera exempel-env för SQLite:
+
+```powershell
+cd Backend
+copy .env.sqlite .env
+```
+
+2. Kör skriptet som skapar `database/database.sqlite` och importerar schema + seed:
+
+```powershell
+php scripts/create_sqlite.php
+```
+
+3. Starta backend-servern:
+
+```powershell
+php -S localhost:8080 -t public
+```
+
+Nu är en enkel delad SQLite-databas skapat i `Backend/database/database.sqlite` (innehåller exempeldata). Om du föredrar MySQL, återställ `.env` till din MySQL-inställning.
+
 Installation (backend)
 
 1. Gå till backend-katalogen:
