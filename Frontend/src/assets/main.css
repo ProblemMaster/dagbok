@@ -151,3 +151,6 @@ small {
 #chart {
   min-height: 400px;
 }
+.apexcharts-toolbar {
+  display: none !important;
+}

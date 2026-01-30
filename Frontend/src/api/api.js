@@ -1,13 +1,23 @@
 // @/api/api.js
 const API_BASE_URL = 'http://localhost:8000'
 
+async function parseJsonSafe(response) {
+  const text = await response.text()
+  if (!text) return null
+  try {
+    return JSON.parse(text)
+  } catch (e) {
+    throw new Error(`Invalid JSON response (status ${response.status})`)
+  }
+}
+
 export default {
   // ============ ACTIVITIES ============
   // Hämta alla aktivitetstyper (Löpning, Yoga, etc.)
   async getActivities() {
     const response = await fetch(`${API_BASE_URL}/activities`)
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    return await response.json()
+    return await parseJsonSafe(response)
   },
 
   // Skapa ny aktivitetstyp
@@ -18,7 +28,7 @@ export default {
       body: JSON.stringify(activityData)
     })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    return await response.json()
+    return await parseJsonSafe(response)
   },
 
   // Uppdatera aktivitetstyp
@@ -29,7 +39,7 @@ export default {
       body: JSON.stringify(activityData)
     })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    return await response.json()
+    return await parseJsonSafe(response)
   },
 
   // Ta bort aktivitetstyp
@@ -38,7 +48,7 @@ export default {
       method: 'DELETE'
     })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    return await response.json()
+    return await parseJsonSafe(response)
   },
 
   // ============ WORKOUTS ============
@@ -46,7 +56,7 @@ export default {
   async getWorkouts() {
     const response = await fetch(`${API_BASE_URL}/workouts`)
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    return await response.json()
+    return await parseJsonSafe(response)
   },
 
   // Skapa ny workout
@@ -57,7 +67,7 @@ export default {
       body: JSON.stringify(workoutData)
     })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    return await response.json()
+    return await parseJsonSafe(response)
   },
 
   // Uppdatera workout
@@ -68,7 +78,7 @@ export default {
       body: JSON.stringify(workoutData)
     })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    return await response.json()
+    return await parseJsonSafe(response)
   },
 
   // Ta bort workout
@@ -77,7 +87,7 @@ export default {
       method: 'DELETE'
     })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    return await response.json()
+    return await parseJsonSafe(response)
   },
 
   // ============ STATISTICS ============
